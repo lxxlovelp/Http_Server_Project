@@ -11,25 +11,20 @@
 #include <sys/epoll.h>
 #include "network/socket.h"
 #include "epoll_server/epoll_server.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
-#include <string.h>
-#include <unistd.h> 
-#include <fcntl.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <sys/epoll.h>
-#include "network/socket.h"
-#include "epoll_server/epoll_server.h"
 
 #define SERVER_PORT 12345
 int main(int argc, char *argv[])
 {
     uint16_t port = SERVER_PORT;//默认端口号
-    if (argc > 1) port = (uint16_t)atoi(argv[1]);//如果命令行参数中指定了端口号，则使用指定的端口号
+
+    if (argc > 1) {
+        char *end;
+	    port = strtoul(argv[1], &end, 10);//将字符串转换为无符号长整型数，并将结果存储在port中
+	        if (*end != 0) {
+		        fprintf(stderr, "port format error!\n");//检查端口号格式是否正确
+		        return -1;
+	    }
+    }
 
     int listen_fd = init_listen_server(port);
     if (listen_fd < 0) return 1;
