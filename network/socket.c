@@ -62,7 +62,7 @@ int init_listen_server(uint16_t port)
     self.sin_addr.s_addr =htonl(INADDR_ANY);
 
 
-    int ret = bind(tcp_socket, (struct sockaddr*)&self, sizeof(self));
+    int ret = bind(tcp_socket, (struct sockaddr*)&self, sizeof(self));//绑定套接字到指定的IP地址和端口号
 
 
     if(ret==-1)

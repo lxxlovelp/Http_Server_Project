@@ -11,105 +11,51 @@
 #include <sys/epoll.h>
 #include "network/socket.h"
 #include "epoll_server/epoll_server.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <string.h>
+#include <unistd.h> 
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <sys/epoll.h>
+#include "network/socket.h"
+#include "epoll_server/epoll_server.h"
 
+#define SERVER_PORT 12345
 int main(int argc, char *argv[])
 {
-    if (argc != 2) {
-        fprintf(stderr, "usage: %s <port>\n", argv[0]);
-        return EXIT_FAILURE;
-    }
+    uint16_t port = SERVER_PORT;//默认端口号
+    if (argc > 1) port = (uint16_t)atoi(argv[1]);//如果命令行参数中指定了端口号，则使用指定的端口号
 
-    uint16_t port = (uint16_t)atoi(argv[1]);
     int listen_fd = init_listen_server(port);
-    if (listen_fd == -1) {
-        return EXIT_FAILURE;
+    if (listen_fd < 0) return 1;
+
+    if (set_nonblock(listen_fd) == -1) {
+        close(listen_fd);
+        return 1;
     }
 
-    int epoll_fd = epoll_create1(0);
+    int epoll_fd = epoll_create1(0);//创建一个epoll实例，返回epoll文件描述符
     if (epoll_fd == -1) {
         perror("epoll_create1");
         close(listen_fd);
-        return EXIT_FAILURE;
+        return 1;
     }
 
     if (add_fd_to_epoll(epoll_fd, listen_fd) == -1) {
-        close(listen_fd);
         close(epoll_fd);
-        return EXIT_FAILURE;
+        close(listen_fd);
+        return 1;
     }
 
-    struct epoll_event events[MAX_EVENTS];
-
-    while (1) {
-        int n = epoll_wait(epoll_fd, events, MAX_EVENTS, -1);
-        if (n == -1) {
-            if (errno == EINTR) continue;
-            perror("epoll_wait");
-            break;
-        }
-
-        for (int i = 0; i < n; i++) {
-            int fd = events[i].data.fd;
-
-            if (fd == listen_fd) {
-                while (1) {
-                    struct sockaddr_in client_addr;
-                    socklen_t client_len = sizeof(client_addr);
-                    int client_fd = accept(listen_fd,
-                                           (struct sockaddr *)&client_addr,
-                                           &client_len);
-                    if (client_fd == -1) {
-                        if (errno == EAGAIN || errno == EWOULDBLOCK) {
-                            break;
-                        }
-                        perror("accept");
-                        break;
-                    }
-
-                    if (set_nonblock(client_fd) == -1) {
-                        close(client_fd);
-                        continue;
-                    }
-
-                    if (add_fd_to_epoll(epoll_fd, client_fd) == -1) {
-                        close(client_fd);
-                        continue;
-                    }
-
-                    char client_ip[INET_ADDRSTRLEN];
-                    inet_ntop(AF_INET, &client_addr.sin_addr, client_ip, sizeof(client_ip));
-                    printf("accepted connection from %s:%u, fd=%d\n",
-                           client_ip, ntohs(client_addr.sin_port), client_fd);
-                }
-            } else if (events[i].events & EPOLLIN) {
-                while (1) {
-                    char buf[BUFFER_SIZE];
-                    ssize_t count = recv(fd, buf, sizeof(buf), 0);
-                    if (count == -1) {
-                        if (errno == EAGAIN || errno == EWOULDBLOCK) {
-                            break;
-                        }
-                        perror("recv");
-                        close(fd);
-                        epoll_ctl(epoll_fd, EPOLL_CTL_DEL, fd, NULL);
-                        break;
-                    } else if (count == 0) {
-                        printf("client closed fd=%d\n", fd);
-                        close(fd);
-                        epoll_ctl(epoll_fd, EPOLL_CTL_DEL, fd, NULL);
-                        break;
-                    } else {
-                        ssize_t written = write(STDOUT_FILENO, buf, count);
-                        if (written == -1) {
-                            perror("write");
-                        }
-                    }
-                }
-            }
-        }
-    }
+    /* 进入 epoll 主循环（函数在 epoll_server.c 中实现） */
+    epoll_wait_loop(epoll_fd, listen_fd);
 
     close(epoll_fd);
     close(listen_fd);
-    return EXIT_SUCCESS;
+    return 0;
 }
