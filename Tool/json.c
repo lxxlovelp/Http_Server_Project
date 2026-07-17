@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include"send.h"
 #include"json.h"
+#include"/home/xingxinliao/lab/cJSON/cJSON.h"
 
 
  struct msgbuf msg2;

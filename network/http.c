@@ -7,13 +7,17 @@
 #include "http.h"
 #include "../Tool/json.h"
 #include"../Tool/send.h"
+#include<errno.h>
 
 int recv_request(int client_fd, char *buffer, size_t buffer_size){
 	
 	ssize_t ret = recv(client_fd, buffer, buffer_size, 0);//接收客户端请求报文
 	//ret 返回值为接收到的字节数，如果返回值为0，表示客户端关闭了连接，如果返回值为-1，表示接收数据失败
 	if (ret < 0) {//如果接收数据失败，打印错误信息并返回-1
-		perror("recv");
+        if(errno!=EAGAIN&&errno!=EWOULDBLOCK){
+
+            perror("recv");
+        }
 		return -1;
 	}
 	return ret;
@@ -52,7 +56,7 @@ void http_route(const char *method, const char *path, const char *body)
 
 
 //处理http请求
-int handle_http_request(char *request) {
+int handle_http_request(const char *request) {
     // 复制一份，因为 strtok 会修改字符串
     char *request_copy = strdup(request);
     if (!request_copy) {

@@ -103,7 +103,7 @@ int epoll_wait_loop(int epoll_fd, int listen_fd)
                         } else {
                             if (errno == EAGAIN || errno == EWOULDBLOCK) {//如果没有更多数据可读，跳出循环
                                 printf("No more data to read\n");
-                                continue;
+                                break;
                             }
                             perror("read");
                             epoll_ctl(epoll_fd, EPOLL_CTL_DEL, fd, NULL);
