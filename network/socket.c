@@ -49,6 +49,7 @@ int init_listen_server(uint16_t port)
     int reuse=1;
 
     setsockopt(tcp_socket, SOL_SOCKET, SO_REUSEADDR, &reuse,sizeof(reuse));
+
     
     struct sockaddr_in self;//创建一个sockaddr_in结构体变量self，用于存储服务器的IP地址和端口号
 
@@ -57,7 +58,7 @@ int init_listen_server(uint16_t port)
 
     self.sin_family = AF_INET;
 
-    self.sin_port = htons(port);
+    self.sin_port = htons(port);//
 
     self.sin_addr.s_addr =htonl(INADDR_ANY);
 

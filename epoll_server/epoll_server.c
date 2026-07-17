@@ -83,13 +83,11 @@ int epoll_wait_loop(int epoll_fd, int listen_fd)
               
                     while (1) {
                     char buffer[1024];
-                    char post_data[512];
-                        ssize_t cnt = recv_request(fd, buffer, sizeof(buffer));
-//读取数据
+                        ssize_t cnt = recv_request(fd, buffer, sizeof(buffer));//读取数据
                         if (cnt > 0) {
-                            int ret = extract_post_data(buffer, post_data, sizeof(post_data));
-                            if(ret==0){
-                                printf("Extracted POST data: %s\n", post_data);
+                            int ret = handle_http_request(buffer);
+                            if(ret==-1){//
+                                printf("Extracted POST data fail;");
                             }
                         } 
                         else if (cnt == 0) {
@@ -97,11 +95,10 @@ int epoll_wait_loop(int epoll_fd, int listen_fd)
                             epoll_ctl(epoll_fd, EPOLL_CTL_DEL, fd, NULL);
                             close(fd);
                             break;
-                        } else 
-                        
-                        {
-                            if (errno == EAGAIN || errno == EWOULDBLOCK) {
-                                break;
+                        } else {
+                            if (errno == EAGAIN || errno == EWOULDBLOCK) {//如果没有更多数据可读，跳出循环
+                                printf("No more data to read\n");
+                                continue;
                             }
                             perror("read");
                             epoll_ctl(epoll_fd, EPOLL_CTL_DEL, fd, NULL);
