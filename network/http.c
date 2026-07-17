@@ -52,7 +52,7 @@ void http_route(const char *method, const char *path, const char *body)
 
 
 //处理http请求
-int handle_http_request(const char *request) {
+int handle_http_request(char *request) {
     // 复制一份，因为 strtok 会修改字符串
     char *request_copy = strdup(request);
     if (!request_copy) {
@@ -83,7 +83,7 @@ int handle_http_request(const char *request) {
     if (method == NULL || path == NULL) {
         fprintf(stderr, "Invalid request line\n");
         free(request_copy);
-        return;
+        return -1;
     }
     // 如果请求有主体（body），需要从原始请求中提取
     // 简单的做法：找到空行（\r\n\r\n 或 \n\n）后的内容

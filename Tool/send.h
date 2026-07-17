@@ -1,5 +1,5 @@
-#ifndef SEND.H
-#define SEND.H
+#ifndef SEND_H
+#define SEND_H
 
 typedef struct {
     int id;
@@ -17,5 +17,5 @@ struct msgbuf {
 
 extern struct  msgbuf msg2;
 
-int Send_Data_Quene(){};
+int Send_Data_Quene();
 #endif

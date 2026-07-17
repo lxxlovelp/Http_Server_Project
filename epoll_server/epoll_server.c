@@ -12,6 +12,8 @@
 #include "../network/socket.h"
 #include "epoll_server.h"
 #include "../network/http.h"
+#include "../Tool/json.h"
+#include"../Tool/send.h"
 
 
 
@@ -87,8 +89,11 @@ int epoll_wait_loop(int epoll_fd, int listen_fd)
                         if (cnt > 0) {
                             int ret = handle_http_request(buffer);
                             if(ret==-1){//
-                                printf("Extracted POST data fail;");
-                            }
+                                printf("dup fail;");
+                                epoll_ctl(epoll_fd, EPOLL_CTL_DEL, fd, NULL);
+                                close(fd);
+                                break;
+                                } 
                         } 
                         else if (cnt == 0) {
                             /* 对端关闭 */
