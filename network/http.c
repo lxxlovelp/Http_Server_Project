@@ -32,8 +32,15 @@ void http_route(const char *method, const char *path, const char *body)
     if(strcmp(method, "POST") == 0 &&
        strcmp(path, "/upload") == 0)
     {
-        parse_json_data(body);
-        Send_Data_Quene();
+        
+        int ret=parse_json_data(body);
+        if(ret==0){
+            Send_Data_Quene();//发送到队列存储
+        }
+        else{
+            perror("parse fail");
+        }
+      
         return;
     }
 
