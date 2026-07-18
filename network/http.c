@@ -8,6 +8,9 @@
 #include "../Tool/json.h"
 #include"../Tool/send.h"
 #include<errno.h>
+#include"../Tool/static_html_handler.h"
+#include"../Tool/no_find.h"
+
 
 int recv_request(int client_fd, char *buffer, size_t buffer_size){
 	
@@ -25,7 +28,7 @@ int recv_request(int client_fd, char *buffer, size_t buffer_size){
  
 
 // HTTP路由表
-void http_route(const char *method, const char *path, const char *body)
+void http_route(const char *method, const char *path, const char *body,int fd)
 {
 
     // POST /upload
@@ -40,16 +43,16 @@ void http_route(const char *method, const char *path, const char *body)
         else{
             perror("parse fail");
         }
-      
         return;
     }
 
 
     // GET /
     if(strcmp(method, "GET") == 0 &&
-       strcmp(path, "/") == 0)
+       strncmp(path, "/static/", 8) == 0)
     {
-        printf("主页请求\n");
+        handle_static(fd, path);
+        printf("静态资源请求\n");
         return;
     }
 
@@ -63,7 +66,7 @@ void http_route(const char *method, const char *path, const char *body)
 
 
 //处理http请求
-int handle_http_request(const char *request) {
+int handle_http_request(const char *request,int fd) {
     // 复制一份，因为 strtok 会修改字符串
     char *request_copy = strdup(request);
     if (!request_copy) {
@@ -110,7 +113,7 @@ int handle_http_request(const char *request) {
     }
 
     // 调用现有的路由函数
-    http_route(method, path, body);
+    http_route(method, path, body,fd);
 
     free(request_copy);
     return 0;

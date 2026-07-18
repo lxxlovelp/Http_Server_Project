@@ -87,7 +87,8 @@ int epoll_wait_loop(int epoll_fd, int listen_fd)
                     char buffer[1024];
                         ssize_t cnt = recv_request(fd, buffer, sizeof(buffer));//读取数据
                         if (cnt > 0) {
-                            int ret = handle_http_request(buffer);
+                          
+                            int ret = handle_http_request(buffer,fd);
                             if(ret==-1){//
                                 printf("dup fail;");
                                 epoll_ctl(epoll_fd, EPOLL_CTL_DEL, fd, NULL);

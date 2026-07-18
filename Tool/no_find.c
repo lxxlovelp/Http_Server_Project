@@ -1,4 +1,7 @@
-
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/socket.h>
+#include "string.h"
 
 void send_404(int client_fd)
 {
