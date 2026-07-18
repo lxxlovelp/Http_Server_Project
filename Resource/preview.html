@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>离谱研究所 🧪</title>
+<style>
+    * {
+        box-sizing: border-box;
+        user-select: none;
+    }
+
+    body {
+        margin: 0;
+        height: 100vh;
+        overflow: hidden;
+        font-family: "Microsoft YaHei", sans-serif;
+        background: linear-gradient(135deg, #ff9a9e, #fad0c4, #a18cd1);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .box {
+        width: 420px;
+        padding: 30px;
+        background: rgba(255,255,255,.85);
+        border-radius: 30px;
+        text-align: center;
+        box-shadow: 0 20px 50px rgba(0,0,0,.2);
+        animation: shake 3s infinite;
+    }
+
+    h1 {
+        font-size: 38px;
+        color: #ff4081;
+        animation: jump 1s infinite alternate;
+    }
+
+    p {
+        font-size: 18px;
+    }
+
+    button {
+        border: none;
+        padding: 15px 25px;
+        margin: 10px;
+        border-radius: 50px;
+        cursor: pointer;
+        font-size: 18px;
+        background: #333;
+        color: white;
+        transition: .3s;
+    }
+
+    button:hover {
+        transform: rotate(10deg) scale(1.1);
+        background: #ff4081;
+    }
+
+    #run {
+        position: absolute;
+    }
+
+    #msg {
+        margin-top: 20px;
+        min-height: 30px;
+        color: #673ab7;
+        font-weight: bold;
+    }
+
+    .emoji {
+        position: absolute;
+        font-size: 30px;
+        animation: fall linear infinite;
+    }
+
+    @keyframes jump {
+        from {transform: translateY(0);}
+        to {transform: translateY(-15px);}
+    }
+
+    @keyframes shake {
+        0%,100% {transform: rotate(0);}
+        25% {transform: rotate(1deg);}
+        75% {transform: rotate(-1deg);}
+    }
+
+    @keyframes fall {
+        from {
+            top:-50px;
+            transform:rotate(0deg);
+        }
+        to {
+            top:110vh;
+            transform:rotate(360deg);
+        }
+    }
+</style>
+</head>
+
+<body>
+
+<div class="box">
+    <h1>🤪 离谱研究所</h1>
+
+    <p>
+        欢迎进入全宇宙第<br>
+        <b>100% 没有任何意义</b><br>
+        的神秘网站！
+    </p>
+
+    <button onclick="laugh()">点击获得今日智慧</button>
+
+    <button id="run" 
+        onmouseover="escapeButton()">
+        不要点我
+    </button>
+
+    <div id="msg"></div>
+</div>
+
+
+<script>
+
+const jokes = [
+    "你的电脑没有坏，它只是累了，想退休。",
+    "科学证明：摸鱼超过5分钟，会变成摸鱼大师。",
+    "恭喜你发现了一个按钮，但按钮也发现了你。",
+    "今天的幸运数字是：不存在。",
+    "你的智商余额不足，请充值快乐。",
+    "系统检测：你帅/美得不符合常理。",
+    "警告：你正在浪费时间，但浪费得很开心。"
+];
+
+
+function laugh(){
+    let msg = document.getElementById("msg");
+    msg.innerHTML = jokes[Math.floor(Math.random()*jokes.length)];
+    
+    document.body.style.transform =
+        "rotate("+(Math.random()*4-2)+"deg)";
+}
+
+
+// 逃跑按钮
+function escapeButton(){
+    let btn=document.getElementById("run");
+
+    btn.style.left=Math.random()*80+"vw";
+    btn.style.top=Math.random()*80+"vh";
+}
+
+
+// 飘落表情
+function createEmoji(){
+
+    let e=document.createElement("div");
+
+    let list=["😂","🤣","🍉","🐸","🤡","💩","✨","🚀"];
+
+    e.innerHTML=list[Math.floor(Math.random()*list.length)];
+
+    e.className="emoji";
+
+    e.style.left=Math.random()*100+"vw";
+
+    e.style.animationDuration=
+        (3+Math.random()*5)+"s";
+
+    document.body.appendChild(e);
+
+    setTimeout(()=>{
+        e.remove();
+    },8000);
+}
+
+
+setInterval(createEmoji,500);
+
+
+// 随机标题
+setInterval(()=>{
+    let titles=[
+        "离谱研究所 🧪",
+        "宇宙摸鱼中心 🐟",
+        "人类迷惑行为观察站 👀",
+        "快乐病毒实验室 🦠"
+    ];
+
+    document.title=
+        titles[Math.floor(Math.random()*titles.length)];
+
+},2000);
+
+</script>
+
+</body>
+</html>
