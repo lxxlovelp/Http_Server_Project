@@ -1,3 +1,4 @@
+
 #include <stdio.h>
 #include <netdb.h>
 #include <sys/socket.h>
@@ -8,8 +9,10 @@
 #include "../Tool/json.h"
 #include"../Tool/send.h"
 #include<errno.h>
+#include <unistd.h>
 #include"../Tool/static_html_handler.h"
 #include"../Tool/no_find.h"
+#include"../Tool/process_create.h"
 
 
 int recv_request(int client_fd, char *buffer, size_t buffer_size){
@@ -52,7 +55,27 @@ void http_route(const char *method, const char *path, const char *body,int fd)
        strncmp(path, "/static/", 8) == 0)
     {
         handle_static(fd, path);
-        printf("静态资源请求\n");
+        printf("-----------------------------静态资源请求-------------------------------\n");
+        return;
+    }
+
+
+
+     if(strcmp(method, "GET") == 0 &&
+       strcmp(path, "/sensor/sensor.cgi") == 0)
+    {
+        process_create();
+          //子进程执行
+             if (process_pid == 0) {
+                printf("child process running...\n");
+                int ret = execl("/home/xingxinliao/Project/CGI/test", "test", NULL);	//execl之后后面函数不执行了
+                if (ret==-1) {
+                perror("execl");
+                exit(5);
+                }
+
+             }
+        printf("动态资源请求成功\n");
         return;
     }
 
