@@ -68,7 +68,7 @@ void http_route(const char *method, const char *path, const char *body,int fd)
           //子进程执行
              if (process_pid == 0) {
                 printf("child process running...\n");
-                int ret = execl("/home/xingxinliao/Project/CGI/test", "test", NULL);	//execl之后后面函数不执行了
+                int ret = execl("/home/xingxinliao/Project/CGI/test", "test", fd);	//execl之后后面函数不执行了
                 if (ret==-1) {
                 perror("execl");
                 exit(5);
