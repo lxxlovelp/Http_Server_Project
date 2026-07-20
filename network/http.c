@@ -68,7 +68,13 @@ void http_route(const char *method, const char *path, const char *body,int fd)
           //子进程执行
              if (process_pid == 0) {
                 printf("child process running...\n");
-                int ret = execl("/home/xingxinliao/Project/CGI/test", "test", fd);	//execl之后后面函数不执行了
+                // dup2(fd, STDIN_FILENO);
+                // 如果不需要原 fd，可以关掉
+                // close(fd);
+                char fd_str[16];
+                snprintf(fd_str, sizeof(fd_str), "%d", fd);  // sockfd 是你的 socket
+
+                int ret = execl("/home/xingxinliao/Project/CGI/test", "test",fd_str,NULL);	//execl之后后面函数不执行了
                 if (ret==-1) {
                 perror("execl");
                 exit(5);

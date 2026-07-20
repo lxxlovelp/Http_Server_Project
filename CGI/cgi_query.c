@@ -8,6 +8,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <sys/socket.h>
 
 typedef struct {
     int id;
@@ -26,7 +27,17 @@ void P(int semid, int num) {
   semop(semid, &op, 1);
 }
 
-int main(void) {
+int main(int argc, char *argv[]) {
+
+  if (argc < 2) {
+        fprintf(stderr, "缺少 fd 参数\n");
+        return 1;
+    }
+    int fd = atoi(argv[1]);
+    printf("子进程接收到的 fd: %d\n", fd);
+    // 你可以直接使用这个 fd 进行 read/write 操作了
+    // 因为文件描述符表在 fork 和 exec 后是继承的（默认不关闭）
+    
   // 1. 生成独一无二的 key (使用自身的 PID)
   key_t my_key = getpid();
   printf("A[%d]: 我是新建的 CGI 请求，我的专属 KEY 是 %d\n", my_key, my_key);
@@ -43,7 +54,10 @@ int main(void) {
   mkfifo(FIFO_PATH, 0666); // 确保管道存在 (如果存在也不会报错)
   int fifo_fd = open(FIFO_PATH, O_WRONLY); 
   if (fifo_fd > 0) {
-      write(fifo_fd, &my_key, sizeof(key_t)); // 把自己的 key 塞进管道
+      int write_d =write(fifo_fd, &my_key, sizeof(key_t)); // 把自己的 key 塞进管道
+      if(write_d<0){
+        perror("write");
+      }
       close(fifo_fd);
   }
 
@@ -53,13 +67,35 @@ int main(void) {
   P(semid, 0);
 
   // 6. B 传完了，A 醒来！
-//   printf("A[%d]: B 处理完毕！我拿到的数据是: %s\n", my_key, addr);
+  // printf("A[%d]: B 处理完毕！我拿到的数据是: %s\n", my_key, addr);
   // 正确：强转为 SensorData 结构体指针
     SensorData *data = (SensorData *)addr;
     printf("A[%d]: B 处理完毕！我拿到的数据是: ID=%d, 湿度=%d, 温度=%.2f, CO2=%d, 光照=%d\n",
     my_key, data->id, data->humidity, data->temperature, data->CO2, data->light);
+    
+    char header[512];
+    sprintf(header,
+        "HTTP/1.1 200 OK\r\n"
+        "Content-Type: text/html; charset=UTF-8\r\n"
+        "\r\n"
+    );
 
-        
+    send(fd, header, strlen(header), 0);
+
+    char buf[1024];
+    int len = snprintf(buf, sizeof(buf),
+        "<html><body>"
+        "ID=%d<br>"
+        "Humidity=%d<br>"
+        "Temperature=%.2f<br>"
+        "CO2=%d<br>"
+        "Light=%d<br>"
+        "</body></html>",
+        data->id, data->humidity, data->temperature, data->CO2, data->light);
+    if (len > 0) {
+        send(fd, buf, (size_t)len, 0);
+    }
+
   // 7. A 负责清理现场：断开挂载，并删除专属共享内存和信号量
   // 建议由 A 自己来删除，因为 A 明确知道自己什么时候“读完了”。
   shmdt(addr);
