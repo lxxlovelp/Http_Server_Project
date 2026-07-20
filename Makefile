@@ -1,22 +1,36 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -O2
-TARGET = epoll_server_project
-SRCS = main.c network/socket.c epoll_server/epoll_server.c network/http.c Tool/json.c Tool/send.c /home/xingxinliao/lab/cJSON/cJSON.c Tool/static_html_handler.c  Tool/no_find.c  Tool/process_create.c CGI/cgi_query.c
 
+# 主程序目标和 CGI 目标
+MAIN_TARGET = epoll_server_project
+CGI_TARGET = CGI/cgi_query
 
-OBJS = $(SRCS:.c=.o)
-LDLIBS= -lm
+# 主程序源码（移除 CGI/cgi_query.c）
+MAIN_SRCS = main.c network/socket.c epoll_server/epoll_server.c network/http.c \
+            Tool/json.c Tool/send.c /home/xingxinliao/lab/cJSON/cJSON.c \
+            Tool/static_html_handler.c Tool/no_find.c Tool/process_create.c
+
+# CGI 源码
+CGI_SRCS = CGI/cgi_query.c
+
+MAIN_OBJS = $(MAIN_SRCS:.c=.o)
+CGI_OBJS = $(CGI_SRCS:.c=.o)
+
+LDLIBS = -lm
 
 .PHONY: all clean
 
-all: $(TARGET)
+all: $(MAIN_TARGET) $(CGI_TARGET)
 
-$(TARGET): $(OBJS)
-	$(CC) $(CFLAGS) -o $@ $(OBJS)
+$(MAIN_TARGET): $(MAIN_OBJS)
+	$(CC) $(CFLAGS) -o $@ $(MAIN_OBJS) $(LDLIBS)
+
+$(CGI_TARGET): $(CGI_OBJS)
+	$(CC) $(CFLAGS) -o $@ $(CGI_OBJS) $(LDLIBS)
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 clean:
-	rm -f $(TARGET) $(OBJS)
-	
+	rm -f $(MAIN_TARGET) $(CGI_TARGET) $(MAIN_OBJS) $(CGI_OBJS)
+

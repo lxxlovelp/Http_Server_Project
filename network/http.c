@@ -74,7 +74,7 @@ void http_route(const char *method, const char *path, const char *body,int fd)
                 char fd_str[16];
                 snprintf(fd_str, sizeof(fd_str), "%d", fd);  // sockfd 是你的 socket
 
-                int ret = execl("/home/xingxinliao/Project/CGI/test", "test",fd_str,NULL);	//execl之后后面函数不执行了
+                int ret = execl("/home/xingxinliao/Project/CGI/cgi_query", "test",fd_str,NULL);	//execl之后后面函数不执行了
                 if (ret==-1) {
                 perror("execl");
                 exit(5);
