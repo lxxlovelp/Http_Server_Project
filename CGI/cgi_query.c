@@ -9,6 +9,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <sys/socket.h>
+#include "cgi_query.h"
 
 typedef struct {
     int id;
